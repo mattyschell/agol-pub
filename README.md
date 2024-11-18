@@ -1,6 +1,6 @@
 # agol-pub
 
-Simple wrappers to publish data to ArcGIS Online.  Friends, these are our wrappers, our rules, the trick is never to be afraid.
+Simple wrappers to publish data to ArcGIS Online.  Friends these are our wrappers, our rules, the trick is never to be afraid.
 
 We will lovingly wrap [these wrappers](https://developers.arcgis.com/python/latest/api-reference/arcgis.html) of REST calls.
 

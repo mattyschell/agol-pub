@@ -11,8 +11,9 @@ class pubitem(object):
                 ,org
                 ,id):
 
-        self.org = org
-        self.id = id
+        self.org  = org
+        self.id   = id
+        self.existingitem = self.org.gis.content.get(self.id)
 
     def describe(self):
 
@@ -22,9 +23,13 @@ class pubitem(object):
     def replace(self,
                 localcontent):
         
-        existingitem = self.org.gis.content.get(self.id)
+        # returns true or false
+        return(self.existingitem.update(data=localcontent))  
 
-        existingitem.update(data=localcontent)       
+    def download(self
+                ,localpath): 
+
+        self.existingitem.download(localpath)  
 
         
 class localgdb(object):
@@ -55,8 +60,8 @@ class localgdb(object):
                            ,'zip'
                            ,self.gdb)
 
-        os.rename("{0}.zip".format(self.gdb)
-                 ,self.zipped)
+        shutil.move("{0}.zip".format(self.gdb)
+                   ,self.zipped)
         
     def clean(self):
         

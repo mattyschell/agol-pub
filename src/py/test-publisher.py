@@ -22,7 +22,7 @@ class PublishTestCase(unittest.TestCase):
                                        ,self.testcreds)
         
         self.pubgdb = publisher.pubitem(self.org
-                                        ,self.testitemid)
+                                       ,self.testitemid)
 
         self.testdatadir = os.path.join(os.path.dirname(os.path.abspath(__file__))
                                        ,'testdata')
@@ -30,7 +30,13 @@ class PublishTestCase(unittest.TestCase):
         self.testgdb = os.path.join(self.testdatadir
                                    ,'sample.gdb')
         
+        self.testemptygdb = os.path.join(self.testdatadir
+                                        ,'emptysample'
+                                        ,'sample.gdb')
+        
         self.localgdb = publisher.localgdb(self.testgdb)
+
+        self.emptylocalgdb = publisher.localgdb(self.testemptygdb)
 
     @classmethod
     def tearDownClass(self):
@@ -59,9 +65,51 @@ class PublishTestCase(unittest.TestCase):
 
         self.localgdb.zip(self.tempdir)
 
-        self.pubgdb.replace(self.localgdb.zipped)
+        # THIS IS IT HERE the simple task we want to complete
+        self.assertTrue(self.pubgdb.replace(self.localgdb.zipped))
 
+        self.localgdb.clean()
 
+    def test_ddownload(self):
+
+        self.pubgdb.download(self.tempdir)
+
+        print("checking {0}".format(os.path.join(self.tempdir
+                                                   ,'sample.gdb.zip')))
+
+        self.assertTrue(os.path.isfile(os.path.join(self.tempdir
+                                                   ,'sample.gdb.zip')))
+        
+    def test_ddownloadandreplace(self):
+
+        # download samplegdb.zip with stuff in it
+        # replace with empty samplegdb.zip
+        # download empty samplegdb.zip
+        # test that the file sizes tell us this is working
+
+        # download sample.gdb.zip and get its size
+        self.pubgdb.download(self.tempdir)
+        big = os.path.getsize(os.path.join(self.tempdir
+                                          ,'sample.gdb.zip'))
+        self.localgdb.clean()
+
+        # zip up emptygdb and publish it
+        self.emptylocalgdb.zip(self.tempdir)
+        self.assertTrue(self.pubgdb.replace(self.emptylocalgdb.zipped))
+        self.emptylocalgdb.clean()
+
+        # download empty samplegdb.zip and get its size
+        self.pubgdb.download(self.tempdir)
+        small = os.path.getsize(os.path.join(self.tempdir
+                                            ,'sample.gdb.zip'))
+        self.emptylocalgdb.clean()
+
+        # re-publish the original non-empty samplegdb.zip
+        self.localgdb.zip(self.tempdir)
+        self.assertTrue(self.pubgdb.replace(self.localgdb.zipped))
+        self.localgdb.clean()
+
+        self.assertTrue(big > small)
 
 
 if __name__ == '__main__':

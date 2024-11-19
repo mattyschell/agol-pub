@@ -37,6 +37,7 @@ class nycmaps(object):
     def describe(self):
 
         for var, value in self.__dict__.items(): 
-            print(f'{var}: {value}')
+            if var != 'creds':
+                print(f'{var}: {value}')
 
         

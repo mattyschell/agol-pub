@@ -48,7 +48,6 @@ class PublishTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
 
-        pass
         if os.path.isfile(self.localgdb.zipped):
             os.remove(self.localgdb.zipped)
 

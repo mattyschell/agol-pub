@@ -112,6 +112,11 @@ class localgdb(object):
             shutil.rmtree(self.renamed, onerror=self.remove_readonly)
 
         if self.zipped:
-            os.remove(self.zipped)
+            shutil.rmtree(self.zipped, ignore_errors=True)
+            
+            #PermissionError: [WinError 32] The process cannot access the file 
+            # because it is being used by another process
+            #os.chmod(self.zipped, stat.S_IWRITE)
+            
 
         

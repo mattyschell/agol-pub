@@ -41,6 +41,11 @@ if __name__ == '__main__':
 
     logging.basicConfig(filename=targetlog
                        ,level=logging.INFO)
+
+    logging.info('precleaning any old temp files at {0}'.format(tempdir))
+    
+    # this should succeed 
+    filegdb.clean()
     
     logging.info('renaming {0} to {1} and zipping it'.format(filegdb.gdb
                                                             ,targetgdbname))
@@ -54,13 +59,22 @@ if __name__ == '__main__':
     logging.info('replacing nycmaps item with id {0}'.format(targetitemid))
 
     try:
-        retval = pubgdb.replace(filegdb.zipped)
-        filegdb.clean()
-        logging.info('Successfully replaced {0}'.format(targetgdbname))
-        retval = 0
+        replaceval = pubgdb.replace(filegdb.zipped)
+        if replaceval:
+            logging.info('Successfully replaced {0}'.format(targetgdbname))
+            retval = 0
+        else:
+            logging.error('Failure, ArcGIS API returned false replacing {0}'.format(targetgdbname))
+            retval = 1
     except:
-        filegdb.clean()
         logging.error('Failure replacing {0}'.format(targetgdbname))
         retval = 1
+
+    try:
+        filegdb.clean()
+    except:
+        # https://github.com/mattyschell/agol-pub/issues/4
+        # shame 
+        pass
 
     exit(retval)

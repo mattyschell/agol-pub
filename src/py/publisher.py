@@ -2,6 +2,7 @@ import organization
 import os
 import stat
 import shutil
+import time
 
 # we may manage several types of content
 # simple first case: a local gdb published to an item on the nycmaps organization 
@@ -112,11 +113,17 @@ class localgdb(object):
             shutil.rmtree(self.renamed, onerror=self.remove_readonly)
 
         if self.zipped:
-            shutil.rmtree(self.zipped, ignore_errors=True)
-            
-            #PermissionError: [WinError 32] The process cannot access the file 
+            # let it throw caller should know
+            os.remove(self.zipped)    
+            # From cscl but not from tests
+            # PermissionError: [WinError 32] The process cannot access the file 
             # because it is being used by another process
-            #os.chmod(self.zipped, stat.S_IWRITE)
+            # reminder that this just fails silently
+            # shutil.rmtree(self.zipped, ignore_errors=True)
+
+
+         
+
             
 
         

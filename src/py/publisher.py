@@ -31,7 +31,17 @@ class pubitem(object):
     def download(self
                 ,localpath): 
 
-        self.existingitem.download(localpath)  
+        #should return path\item.zip
+        self.zipped = self.existingitem.download(localpath)
+
+        if not self.zipped.endswith('.zip'):
+            raise ValueError('didnt download a zip file, got {0}'.format(self.zipped))
+
+    def clean(self):
+
+         if self.zipped:
+            # let it throw caller should know
+            os.remove(self.zipped)          
 
         
 class localgdb(object):

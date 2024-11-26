@@ -47,9 +47,11 @@ class PublishTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(self):
+        pass
 
-        if os.path.isfile(self.localgdb.zipped):
-            os.remove(self.localgdb.zipped)
+        # call clean and test that it works in all cases
+        #if os.path.isfile(self.localgdb.zipped):
+        #    os.remove(self.localgdb.zipped)
 
     def test_adescribe(self):
 
@@ -65,7 +67,6 @@ class PublishTestCase(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.localgdb.zipped))
 
         self.localgdb.clean()
-
         self.assertFalse(os.path.isfile(self.localgdb.zipped))
 
     def test_clocalgdbrenamezip(self):
@@ -76,10 +77,8 @@ class PublishTestCase(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.localgdb.zipped))
 
         self.localgdb.clean()
-
         self.assertFalse(os.path.isfile(self.localgdb.zipped))
-
-        self.assertFalse(os.path.isfile(self.localgdb.renamed))
+        self.assertFalse(os.path.isdir(self.localgdb.renamed))
 
     def test_dreplaceitem(self):
 
@@ -88,6 +87,7 @@ class PublishTestCase(unittest.TestCase):
         self.assertTrue(self.pubgdb.replace(self.localgdb.zipped))
 
         self.localgdb.clean()
+        self.assertFalse(os.path.isfile(self.localgdb.zipped))
 
     def test_edownload(self):
 
@@ -95,6 +95,9 @@ class PublishTestCase(unittest.TestCase):
 
         self.assertTrue(os.path.isfile(os.path.join(self.tempdir
                                                    ,'sample.gdb.zip')))
+        
+        self.pubgdb.clean()
+        self.assertFalse(os.path.isfile(self.pubgdb.zipped)) 
         
     def test_fdownloadandreplace(self):
 
@@ -107,23 +110,33 @@ class PublishTestCase(unittest.TestCase):
         self.pubgdb.download(self.tempdir)
         big = os.path.getsize(os.path.join(self.tempdir
                                           ,'sample.gdb.zip'))
-        self.localgdb.clean()
+        
+        # a downloaded gdb is implicitly a local gdb?
+        self.pubgdb.clean()
+        self.assertFalse(os.path.isfile(self.pubgdb.zipped))
 
         # zip up emptygdb and publish it
         self.emptylocalgdb.zip(self.tempdir)
         self.assertTrue(self.pubgdb.replace(self.emptylocalgdb.zipped))
+        
         self.emptylocalgdb.clean()
+        self.assertFalse(os.path.isfile(self.emptylocalgdb.zipped))
 
         # download empty samplegdb.zip and get its size
         self.pubgdb.download(self.tempdir)
         small = os.path.getsize(os.path.join(self.tempdir
                                             ,'sample.gdb.zip'))
-        self.emptylocalgdb.clean()
+        
+        self.pubgdb.clean()        
+        self.assertFalse(os.path.isfile(self.emptylocalgdb.zipped))
 
         # re-publish the original non-empty samplegdb.zip
         self.localgdb.zip(self.tempdir)
         self.assertTrue(self.pubgdb.replace(self.localgdb.zipped))
+        
         self.localgdb.clean()
+        self.assertFalse(os.path.isfile(self.localgdb.zipped))
+        self.assertFalse(os.path.isdir(self.localgdb.renamed))
 
         self.assertTrue(big > small)
 
@@ -139,24 +152,33 @@ class PublishTestCase(unittest.TestCase):
         self.pubgdb.download(self.tempdir)
         big = os.path.getsize(os.path.join(self.tempdir
                                           ,'sample.gdb.zip'))
-        self.localgdb.clean()
+        
+        self.pubgdb.clean()
+        self.assertFalse(os.path.isfile(self.pubgdb.zipped))
 
         # zip up emptygdb and publish it
         self.emptydiffnamelocalgdb.renamezip(self.tempdir
                                             ,'sample.gdb')
         self.assertTrue(self.pubgdb.replace(self.emptydiffnamelocalgdb.zipped))
+        
         self.emptydiffnamelocalgdb.clean()
+        self.assertFalse(os.path.isfile(self.emptydiffnamelocalgdb.zipped))
+        self.assertFalse(os.path.isfile(self.emptydiffnamelocalgdb.renamed))
 
         # download empty samplegdb.zip and get its size
         self.pubgdb.download(self.tempdir)
         small = os.path.getsize(os.path.join(self.tempdir
                                             ,'sample.gdb.zip'))
-        self.emptylocalgdb.clean()
+        
+        self.pubgdb.clean()
+        self.assertFalse(os.path.isfile(self.emptylocalgdb.zipped))
 
         # re-publish the original non-empty samplegdb.zip
         self.localgdb.zip(self.tempdir)
         self.assertTrue(self.pubgdb.replace(self.localgdb.zipped))
+        
         self.localgdb.clean()
+        self.assertFalse(os.path.isfile(self.localgdb.zipped))
 
         self.assertTrue(big > small)
 

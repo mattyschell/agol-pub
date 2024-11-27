@@ -10,9 +10,17 @@ We will lovingly wrap [these wrappers](https://developers.arcgis.com/python/late
 1. ArcGIS Pro installed (ie Python 3+)
 2. A user and credentials for the nycmaps arcgis online organization
 
+## Replace a File Geodatabase
+
+Copy geodatabase-scripts\sample-replace-cscl-gdb.bat out to a scripts directory, rename it, and update the environmentals.
+
+```shell
+C:\gis\geodatabase-scripts>replace-cscl-gdb.bat
+``` 
+
 ## Test The Code In This Repository
 
-See individual src\py\test-* test cases for sample uses. To run all tests update the environmentals in testall.bat and call it.
+See individual src\py\test-* test cases for sample uses. To run all tests update the environmentals in testall.bat and call it.  The tests expect a dummmy item to exist in the NYCMaps ArcGIS Online organization.
 
 ```shell
 C:\gis\agol-pub>testall.bat

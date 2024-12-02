@@ -33,8 +33,8 @@ if __name__ == '__main__':
     except Exception as e:
         raise ValueError("Failure {0} in instantiation".format(e)) 
     
-    # replace-cscl-20241121-114410.log
-    # replace-cscl_pub-20241121-114410.log
+    # replace-cscl-gdb-20241121-114410.log
+    # replace-cscl_pub-gdb-20241121-114410.log
     targetlog = os.path.join(os.environ['TARGETLOGDIR'] 
                             ,'replace-{0}-{1}.log'.format(targetgdbname.replace('.', '-')
                                                          ,timestr))
@@ -57,7 +57,6 @@ if __name__ == '__main__':
                      ,targetgdbname)
 
     logging.info('replacing nycmaps item with id {0}'.format(targetitemid))
-
     try:
         replaceval = pubgdb.replace(filegdb.zipped)
         if replaceval:
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     except:
         logging.error('Failure replacing {0}'.format(targetgdbname))
         retval = 1
-
+    
     try:
         filegdb.clean()
     except:
@@ -77,4 +76,4 @@ if __name__ == '__main__':
         # shame 
         pass
 
-    exit(retval)
+    sys.exit(retval)

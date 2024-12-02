@@ -88,6 +88,11 @@ class localgdb(object):
         self.renamed = os.path.join(zippath,"{0}".format(name))
         self.zipped = os.path.join(zippath
                                   ,"{0}.zip".format(name))
+        
+        # these are work files in a temp directory
+        # we have locks and permissions confusions
+        # never hesitate to pre-clean
+        self.clean()
 
         # C:\temp\dir1\mydata.gdb to
         # C:\temp\dir2\mydata.gdb

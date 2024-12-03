@@ -24,9 +24,9 @@ echo starting up our work on %AGOLGDBNAME% on %date% at %time% > %BATLOG%
 ) 
 echo. >> %BATLOG% && echo performing %AGOLGDBNAME% QA on %date% at %time% >> %BATLOG%
 %PROPY% %AGOLPUB%replace-cscl-qa.py %ITEMID% %AGOLGDBNAME% %WORKDIR% %GDBZIPSIZE% && (
-    %PROPY% %AGOLPUB%notify.py ": Failed QA of %AGOLGDBNAME% item %ITEMID%" %NOTIFY% "qa"
+    %PROPY% %AGOLPUB%notify.py "QA of %AGOLGDBNAME% item %ITEMID%" %NOTIFY% "qa"
 ) || (
-    %PROPY% %AGOLPUB%notify.py ": Failed QA of %AGOLGDBNAME% item %ITEMID%" %NOTIFY% "qa"
+    %PROPY% %AGOLPUB%notify.py "Failed QA of %AGOLGDBNAME% item %ITEMID%" %NOTIFY% "qa"
 ) 
 echo. >> %BATLOG% && echo completed notifying the squad of %AGOLGDBNAME% QA results on %date% at %time% >> %BATLOG%
 set PYTHONPATH=%PYTHONPATH0%

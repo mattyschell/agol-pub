@@ -1,6 +1,7 @@
 try:
     print('slowly importing {0}'.format('arcgis'))
     from arcgis.gis import GIS
+    print('completed importing {0}'.format('arcgis'))
 except ImportError as e: 
     raise ImportError("Failed to import arcgis. Check that you are calling from ArcGIS Pro python") from e
 

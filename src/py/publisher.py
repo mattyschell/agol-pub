@@ -127,7 +127,7 @@ class localgdb(object):
             # onexc callback is copied verbatim from the shutil docs
             shutil.rmtree(self.renamed, onerror=self.remove_readonly)
 
-        if self.zipped:
+        if (self.zipped and os.path.isfile(self.zipped)):
             # let it throw caller should know
             os.remove(self.zipped)    
             # From cscl but not from tests

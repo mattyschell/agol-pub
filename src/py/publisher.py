@@ -58,57 +58,70 @@ class localgdb(object):
 
         self.renamed = None
         self.zipped  = None
+        self.unzipped = None
         
     def zip(self
            ,zippath):
         
-        # plan to always zip to a new path
-        # the source cscl environment is shared
-        # zip then move for performance
+        # we mostly always renamezip (slower, next def)
+        # zip then move here
         
-        # zippath C:\temp\dir2
-        # C:\temp\dir1\mydata.gdb
-        # C:\temp\dir2\mydata.gdb.zip
+        # zippath is the target dir
+        #     C:\dir2
+        # start: C:\dir1\mydata.gdb
+        # end:   C:\dir2\mydata.gdb.zip        
 
-        self.zipped = os.path.join(zippath
-                                  ,"{0}.zip".format(self.gdbname))
-        
-        shutil.make_archive(self.gdb
-                           ,'zip'
-                           ,self.gdb)
+        zippedsrc = shutil.make_archive(self.gdb
+                                       ,'zip'
+                                       ,self.gdbpath
+                                       ,self.gdbname)
 
-        shutil.move("{0}.zip".format(self.gdb)
-                   ,self.zipped)
+        self.zipped = shutil.move(zippedsrc
+                                 ,zippath)
 
     def renamezip(self
                  ,zippath
                  ,name):
 
+        # zippath is the target dir
+        #     C:\dir2
+        # name is the new name 
+        #     pubdata.gdb
+        # start: C:\dir1\mydata.gdb
+        # end:   C:\dir2\pubdata.gdb.zip  
         # 1 copy 2 rename 3 zip
+
         self.renamed = os.path.join(zippath,"{0}".format(name))
-        self.zipped = os.path.join(zippath
-                                  ,"{0}.zip".format(name))
+        #self.zipped = os.path.join(zippath
+        #                          ,"{0}.zip".format(name))
         
-        # these are work files in a temp directory
-        # we have locks and permissions confusions
-        # never hesitate to pre-clean
+        # pre-clean
         self.clean()
 
-        # C:\temp\dir1\mydata.gdb to
-        # C:\temp\dir2\mydata.gdb
+        # C:\dir1\mydata.gdb to
+        # C:\dir2\mydata.gdb
         shutil.copytree(self.gdb
                        ,os.path.join(zippath,"{0}".format(self.gdbname)))
 
-        # C:\temp\dir2\mydata.gdb to
-        # C:\temp\dir2\pubdata.gdb
+        # C:\dir2\mydata.gdb to
+        # C:\dir2\pubdata.gdb
         os.rename(os.path.join(zippath,"{0}".format(self.gdbname))
                  ,self.renamed)
         
         # C:\temp\dir2\pubdata.gdb
         # C:\temp\dir2\pubdata.gdb.zip
-        shutil.make_archive(self.renamed
-                           ,'zip'
-                           ,self.renamed)
+        self.zipped = shutil.make_archive(self.renamed
+                                         ,'zip'
+                                         ,zippath
+                                         ,name)
+        
+    def unzip(self
+             ,unzippath):
+        
+        shutil.unpack_archive(self.zipped
+                             ,unzippath)   
+
+        self.unzipped = self.zipped.replace('.zip','')     
 
     def remove_readonly(self
                        ,func
@@ -135,6 +148,9 @@ class localgdb(object):
             # because it is being used by another process
             # reminder that this just fails silently
             # shutil.rmtree(self.zipped, ignore_errors=True)
+
+        if (self.unzipped and os.path.isdir(self.unzipped)):
+            shutil.rmtree(self.unzipped, onerror=self.remove_readonly)
 
 
          

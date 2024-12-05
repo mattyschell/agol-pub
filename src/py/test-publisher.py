@@ -45,13 +45,16 @@ class PublishTestCase(unittest.TestCase):
 
         self.emptydiffnamelocalgdb = publisher.localgdb(self.testemptydiffnamegdb)
 
+    def tearDown(self):
+
+        self.localgdb.clean()
+        self.emptylocalgdb.clean()
+        self.emptydiffnamelocalgdb.clean()
+
     @classmethod
     def tearDownClass(self):
         pass
 
-        # call clean and test that it works in all cases
-        #if os.path.isfile(self.localgdb.zipped):
-        #    os.remove(self.localgdb.zipped)
 
     def test_adescribe(self):
 
@@ -79,6 +82,7 @@ class PublishTestCase(unittest.TestCase):
         self.localgdb.clean()
         self.assertFalse(os.path.isfile(self.localgdb.zipped))
         self.assertFalse(os.path.isdir(self.localgdb.renamed))
+        self.assertTrue(not any(Path(self.tempdir).iterdir()))
 
     def test_dreplaceitem(self):
 
@@ -182,6 +186,28 @@ class PublishTestCase(unittest.TestCase):
 
         self.assertTrue(big > small)
 
+    def test_hzipnesting(self):
+        
+        self.localgdb.renamezip(self.tempdir
+                               ,'renamesample.gdb')
+
+        self.assertTrue(os.path.isfile(self.localgdb.zipped))
+
+        self.localgdb.unzip(self.tempdir)
+        self.assertTrue(os.path.isdir(self.localgdb.unzipped))
+
+        self.assertTrue(os.path.isdir(os.path.join(self.tempdir
+                                                  ,'renamesample.gdb')))
+
+        self.localgdb.clean()
+        self.assertFalse(os.path.isfile(self.localgdb.zipped))
+        self.assertFalse(os.path.isdir(self.localgdb.renamed))
+        self.assertFalse(os.path.isdir(self.localgdb.unzipped))
+
+        # this is the test that the nesting and cleanup are good
+        # unzip should not leave a000001.freelist a00001.gdbindexes etc
+        # at the top of the tempdir. check that tempdir is empty
+        self.assertTrue(not any(Path(self.tempdir).iterdir()))
 
 if __name__ == '__main__':
     unittest.main()

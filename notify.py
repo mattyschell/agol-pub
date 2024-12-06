@@ -6,6 +6,9 @@ import smtplib
 import socket
 from email.message import EmailMessage
 
+# meta-notification:
+# we modified his notify.py from the similar notify.pys in neighboring repos
+
 
 def getlogfile(logdir
               ,logtype):
@@ -24,6 +27,23 @@ def getlogfile(logdir
         loglines = file.read()
 
     return loglines
+
+def getspecialcontent(notification
+                     ,baseurl='https://nyc.maps.arcgis.com/home/item.html?id='
+                     ,wiki='https://appdevwiki.nycnet/appdev/index.php?title=GIS_Data_Maintenance_Scripts#CSCL_Publishing_To_NYCMaps'):
+
+    # PRD: Replaced and QAd nycmaps cscl_pub.gdb item 9163b04952354da2bf748abe1788e985
+    itemid = notification.split()[-1]
+
+    scontent  = '{0}{1}'.format(baseurl
+                               ,itemid)
+    scontent += '{0}Running from {1}'.format(os.linesep
+                                           ,socket.gethostname())
+    scontent += '{0}See the wiki for more info-- {1}'.format(os.linesep,
+                                                             wiki)
+    
+    return scontent
+
 
 if __name__ == "__main__":
 
@@ -46,13 +66,19 @@ if __name__ == "__main__":
 
     # notification is like "importing buildings onto dev.sde"
 
-    content  = 'Completed {0} '.format(notification)
-    msg['Subject'] = content
+    msg['Subject'] = '{0}'.format(notification)
+
+    content  = '{0}{1}'.format(notification
+                               ,os.linesep)
+
     content += 'at {0} {1}'.format(datetime.datetime.now()
                                   ,os.linesep)
+    
+    content += '{0}{1}'.format(getspecialcontent(notification)
+                               ,os.linesep)
 
-    content += '\n\n' + getlogfile(logdir
-                                  ,plogtype)   
+    content += os.linesep + getlogfile(logdir
+                                      ,plogtype)   
     
     msg.set_content(content)    
     msg['From'] = emailfrom

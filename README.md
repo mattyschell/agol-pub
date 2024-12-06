@@ -7,8 +7,9 @@ We will lovingly wrap [these wrappers](https://developers.arcgis.com/python/late
 
 ## Requirements
 
-1. ArcGIS Pro installed (ie Python 3+)
+1. ArcGIS Pro installed (ie python _import_ _arcgis_)
 2. A user and credentials for the nycmaps arcgis online organization
+3. QA requires _import_ _arcpy_
 
 ## Replace a File Geodatabase
 

@@ -49,12 +49,11 @@ class localgdb(object):
     def __init__(self
                 ,filegdb):
 
-        if os.path.isdir(filegdb):
-            self.gdb  = filegdb
-            self.gdbname = os.path.basename(self.gdb)
-            self.gdbpath = os.path.dirname(self.gdb)
-        else:
-            raise ValueError("{0} is not a valid path to a file geodatabase".format(filegdb))
+        # we dont check for existence
+        # so we can use clean() as a pre-step
+        self.gdb  = filegdb
+        self.gdbname = os.path.basename(self.gdb)
+        self.gdbpath = os.path.dirname(self.gdb)
 
         self.renamed = None
         self.zipped  = None

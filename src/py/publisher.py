@@ -55,8 +55,11 @@ class localgdb(object):
         self.gdbname = os.path.basename(self.gdb)
         self.gdbpath = os.path.dirname(self.gdb)
 
-        self.renamed = None
-        self.zipped  = None
+        # depending on failure point any of these can exist 
+        # and muck up a re-run
+        self.tempcopy = None 
+        self.renamed  = None
+        self.zipped   = None
         self.unzipped = None
         
     def zip(self
@@ -90,10 +93,9 @@ class localgdb(object):
         # end:   C:\dir2\pubdata.gdb.zip  
         # 1 copy 2 rename 3 zip
 
-        self.renamed = os.path.join(zippath,"{0}".format(name))
-        #self.zipped = os.path.join(zippath
-        #                          ,"{0}.zip".format(name))
-        
+        self.tempcopy = os.path.join(zippath,"{0}".format(self.gdbname))
+        self.renamed  = os.path.join(zippath,"{0}".format(name))
+
         # pre-clean
         self.clean()
 
@@ -131,6 +133,13 @@ class localgdb(object):
         func(path)
 
     def clean(self):
+
+        if (self.tempcopy and os.path.exists(self.tempcopy)):
+            # PermissionError: [WinError 5] 
+            #     Access is denied: 'D:\\temp\\renamesample.gdb'
+            # some files in the gdb are readonly (but not the dir itself)
+            # onexc callback is copied verbatim from the shutil docs
+            shutil.rmtree(self.tempcopy, onerror=self.remove_readonly)
         
         if (self.renamed and os.path.exists(self.renamed)):
             # PermissionError: [WinError 5] 

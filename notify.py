@@ -74,8 +74,9 @@ if __name__ == "__main__":
     content += 'at {0} {1}'.format(datetime.datetime.now()
                                   ,os.linesep)
     
-    content += '{0}{1}'.format(getspecialcontent(notification)
-                               ,os.linesep)
+    if not notification.startswith('Fail'):
+        content += '{0}{1}'.format(getspecialcontent(notification)
+                                ,os.linesep)
 
     content += os.linesep + getlogfile(logdir
                                       ,plogtype)   

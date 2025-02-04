@@ -53,27 +53,37 @@ if __name__ == '__main__':
     pubgdb = publisher.pubitem(org
                               ,targetitemid)
     
-    filegdb.renamezip(tempdir
-                     ,targetgdbname)
-
-    logging.info('replacing nycmaps item with id {0}'.format(targetitemid))
     try:
-        replaceval = pubgdb.replace(filegdb.zipped)
-        if replaceval:
-            logging.info('Successfully replaced {0}'.format(targetgdbname))
-            retval = 0
-        else:
-            logging.error('Failure, ArcGIS API returned false replacing {0}'.format(targetgdbname))
-            retval = 1
-    except:
-        logging.error('Failure replacing {0}'.format(targetgdbname))
+        # a known source (get it) of issues
+        filegdb.renamezip(tempdir
+                         ,targetgdbname)
+        retval = 0
+    except Exception as e:
+        logging.error('Failure calling renamezip for {0}'.format(filegdb.gdb))
+        logging.error('The error is {0}'.format(e))
         retval = 1
+                        
+    if retval == 0:
+        logging.info('replacing nycmaps item with id {0}'.format(targetitemid))
+
+        try:
+            replaceval = pubgdb.replace(filegdb.zipped)
+            if replaceval:
+                logging.info('Successfully replaced {0}'.format(targetgdbname))
+                retval = 0
+            else:
+                logging.error('Failure, ArcGIS API returned false replacing {0}'.format(targetgdbname))
+                retval = 1
+        except:
+            logging.error('Failure replacing {0}'.format(targetgdbname))
+            retval = 1
+        
+        try:
+            filegdb.clean()
+        except:
+            # https://github.com/mattyschell/agol-pub/issues/4
+            # shame 
+            pass
     
-    try:
-        filegdb.clean()
-    except:
-        # https://github.com/mattyschell/agol-pub/issues/4
-        # shame 
-        pass
 
     sys.exit(retval)

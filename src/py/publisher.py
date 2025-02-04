@@ -101,8 +101,25 @@ class localgdb(object):
 
         # C:\dir1\mydata.gdb to
         # C:\dir2\mydata.gdb
-        shutil.copytree(self.gdb
-                       ,os.path.join(zippath,"{0}".format(self.gdbname)))
+
+        # this is our most likely spot to fail
+        # if the source is not present or is locked
+        # the CSCL production environment is mysterious
+        try:
+            shutil.copytree(self.gdb
+                           ,os.path.join(zippath,"{0}".format(self.gdbname)))
+        except FileNotFoundError as fnf_error:
+            print(f"File not found: {fnf_error}")
+            raise FileNotFoundError(f"File not found: {fnf_error}") 
+        except PermissionError as perm_error:
+            print(f"Permission error: {perm_error}")
+            raise PermissionError(f"Permission error: {perm_error}")
+        except shutil.Error as shutil_error:
+            print(f"Shutil error: {shutil_error}")
+            raise shutil.Error(f"Shutil error: {shutil_error}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            raise Exception(f"An unexpected error occurred: {e}")
 
         # C:\dir2\mydata.gdb to
         # C:\dir2\pubdata.gdb

@@ -39,11 +39,17 @@ class PublishTestCase(unittest.TestCase):
                                                 ,'emptysample'
                                                 ,'emptysamplewithdiffname.gdb')
         
+        self.nonexistentgdb = os.path.join(self.testdatadir
+                                          ,'bad.gdb')
+
         self.localgdb = publisher.localgdb(self.testgdb)
 
         self.emptylocalgdb = publisher.localgdb(self.testemptygdb)
 
         self.emptydiffnamelocalgdb = publisher.localgdb(self.testemptydiffnamegdb)
+
+        self.nonexistentlocalgdb = publisher.localgdb(self.nonexistentgdb)
+
 
     def tearDown(self):
 
@@ -208,6 +214,14 @@ class PublishTestCase(unittest.TestCase):
         # unzip should not leave a000001.freelist a00001.gdbindexes etc
         # at the top of the tempdir. check that tempdir is empty
         self.assertTrue(not any(Path(self.tempdir).iterdir()))
+
+    def test_irenamezipfail(self):
+
+        with self.assertRaises(FileNotFoundError) as context:
+            self.nonexistentlocalgdb.renamezip(self.tempdir
+                                              ,'renamesample.gdb')
+        self.assertTrue(str(context.exception).startswith, "File not found")
+
 
 if __name__ == '__main__':
     unittest.main()

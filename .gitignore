@@ -4,5 +4,6 @@ scratch/
 # python
 *.pyc
 
-*local.bat
-
+*local*.bat
+geodatabase-scripts/*.bat
+geodatabase-scripts/!sample*.bat

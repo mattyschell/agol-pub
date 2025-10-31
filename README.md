@@ -21,7 +21,7 @@ C:\gis\geodatabase-scripts>replace-cscl-gdb.bat
 
 ## Test The Code In This Repository
 
-See individual src\py\test-* test cases for sample uses. To run all tests update the environmentals in testall.bat and call it.  The tests expect a dummmy item to exist in the NYCMaps ArcGIS Online organization.
+See individual src\py\test-* test cases for sample uses. To run all tests update the environmentals in testall.bat and call it.  The tests expect a dummy item to exist in the NYCMaps ArcGIS Online organization.
 
 ```shell
 C:\gis\agol-pub>testall.bat

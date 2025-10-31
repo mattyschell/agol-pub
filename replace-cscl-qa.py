@@ -165,3 +165,8 @@ if __name__ == '__main__':
         # QA does not notify. It QAs 
         qalogger.error('ERROR: Please review {0}'.format(os.linesep))
         qalogger.error(retqareport)
+        sys.exit(1)
+
+    else:
+
+        sys.exit(0)

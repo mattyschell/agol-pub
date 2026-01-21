@@ -7,6 +7,7 @@ except ImportError as e:
 
 import os
 import publisher
+from pprint import pformat
 
 # probably just one class here for now
 
@@ -34,11 +35,11 @@ class nycmaps(object):
         
         self.token = self.gis.session.auth.token
 
-
     def describe(self):
+    
+        items = {k: v for k, v in self.__dict__.items() if k != "creds"}
+        width = max(len(k) for k in items)
 
-        for var, value in self.__dict__.items(): 
-            if var != 'creds':
-                print(f'{var}: {value}')
-
-        
+        for var, value in items.items(): 
+            print('{0} : {1}'.format(var.ljust(width)
+                                    ,value))        

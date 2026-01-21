@@ -42,25 +42,25 @@ class PublishTestCase(unittest.TestCase):
         self.nonexistentgdb = os.path.join(self.testdatadir
                                           ,'bad.gdb')
 
+        self.testgdbwithlocks = os.path.join(self.testdatadir
+                                            ,'samplewithlocks.gdb')
+
         self.localgdb = publisher.localgdb(self.testgdb)
-
         self.emptylocalgdb = publisher.localgdb(self.testemptygdb)
-
         self.emptydiffnamelocalgdb = publisher.localgdb(self.testemptydiffnamegdb)
-
         self.nonexistentlocalgdb = publisher.localgdb(self.nonexistentgdb)
-
+        self.localgdbwithlocks = publisher.localgdb(self.testgdbwithlocks)
 
     def tearDown(self):
 
         self.localgdb.clean()
         self.emptylocalgdb.clean()
         self.emptydiffnamelocalgdb.clean()
+        self.localgdbwithlocks.clean()
 
     @classmethod
     def tearDownClass(self):
         pass
-
 
     def test_adescribe(self):
 
@@ -221,6 +221,19 @@ class PublishTestCase(unittest.TestCase):
             self.nonexistentlocalgdb.renamezip(self.tempdir
                                               ,'renamesample.gdb')
         self.assertTrue(str(context.exception).startswith, "File not found")
+
+    def test_jrenamezipwithlocks(self):
+
+        self.localgdbwithlocks.renamezip(self.tempdir
+                                        ,'renamesamplewithlocks.gdb')
+
+        self.assertTrue(os.path.isfile(self.localgdbwithlocks.zipped))
+        self.assertFalse(self.localgdbwithlocks.has_locks())
+
+        self.localgdbwithlocks.clean()
+        self.assertFalse(os.path.isfile(self.localgdbwithlocks.zipped))
+        self.assertFalse(os.path.isdir(self.localgdbwithlocks.renamed))
+        self.assertTrue(not any(Path(self.tempdir).iterdir()))
 
 
 if __name__ == '__main__':

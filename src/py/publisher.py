@@ -3,9 +3,11 @@ import os
 import stat
 import shutil
 import time
+from pathlib import Path
 
 # we may manage several types of content
-# simple first case: a local gdb published to an item on the nycmaps organization 
+# simple first case: a local gdb published to an item 
+#                    on the nycmaps organization 
 
 class pubitem(object):
 
@@ -107,7 +109,8 @@ class localgdb(object):
         # the CSCL production environment is mysterious
         try:
             shutil.copytree(self.gdb
-                           ,os.path.join(zippath,"{0}".format(self.gdbname)))
+                           ,self.tempcopy
+                           ,ignore=shutil.ignore_patterns("*.lock"))
         except FileNotFoundError as fnf_error:
             print(f"File not found: {fnf_error}")
             raise FileNotFoundError(f"File not found: {fnf_error}") 
@@ -123,7 +126,7 @@ class localgdb(object):
 
         # C:\dir2\mydata.gdb to
         # C:\dir2\pubdata.gdb
-        os.rename(os.path.join(zippath,"{0}".format(self.gdbname))
+        os.rename(self.tempcopy
                  ,self.renamed)
         
         # C:\temp\dir2\pubdata.gdb
@@ -148,6 +151,26 @@ class localgdb(object):
         
         os.chmod(path, stat.S_IWRITE)
         func(path)
+
+    def has_locks(self):
+
+        # after copying from self.gdb source
+        # none of our target gdbs should contain locks
+        if ( self.tempcopy 
+             and Path(self.tempcopy).exists() 
+             and any(Path(self.tempcopy).glob("*.lock"))
+           ):
+           return True
+        if ( self.renamed 
+             and Path(self.renamed).exists() 
+             and any(Path(self.renamed).glob("*.lock"))
+           ):
+           return True
+        if ( self.unzipped 
+             and Path(self.unzipped).exists() 
+             and any(Path(self.unzipped).glob("*.lock"))
+           ):
+           return True
 
     def clean(self):
 

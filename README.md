@@ -16,8 +16,42 @@ We will lovingly wrap [these wrappers](https://developers.arcgis.com/python/late
 Copy geodatabase-scripts\sample-replace-cscl-gdb.bat out to a scripts directory, rename it, and update the environmentals.
 
 ```shell
-C:\gis\geodatabase-scripts>replace-cscl-gdb.bat
+C:\gis\geodatabase-scripts>sample-replace-cscl-gdb.bat
 ``` 
+
+### Replace python script
+
+```
+usage: replace-cscl-gdb.py [-h] srcgdb targetgdbname targetitemid tempdir
+
+Replace a file geodatabase in ArcGIS Online
+
+positional arguments:
+  srcgdb         Local file geodatabase
+  targetgdbname  File geodatabase name in ArcGIS Online
+  targetitemid   Item id in ArcGIS Online
+  tempdir        A local temp directory
+
+options:
+  -h, --help     show this help message and exit
+```
+
+### QA python script
+
+```
+usage: replace-cscl-qa.py [-h] pitemid pgdbname ptempdir pzipmb
+
+QA a file geodatabase in ArcGIS Online
+
+positional arguments:
+  pitemid     Item id in ArcGIS Online
+  pgdbname    File geodatabase name
+  ptempdir    A local temp directory
+  pzipmb      Expected geodatabase MB zipped
+
+options:
+  -h, --help  show this help message and exit
+```
 
 ## Test The Code In This Repository
 

@@ -4,6 +4,7 @@ import logging
 import os
 import zipfile
 import shutil
+import argparse
 print('importing arcpy')
 import arcpy
 print('finished importing arcpy')
@@ -24,8 +25,8 @@ def isreasonablesize(pzipfile
                     ,pvariance):
     
     sizemb = os.path.getsize(pzipfile) / (1024 * 1024)
-    
-    if (abs(int(pexpectedmb) - sizemb) / int(pexpectedmb) * 100) > int(pvariance):
+
+    if (abs(pexpectedmb - sizemb) / pexpectedmb * 100) > int(pvariance):
         return False
     else:
         return True
@@ -73,11 +74,11 @@ def isvalidgdb(pzipfile
     else:
         return False
 
-def main(downloadedzip
-        ,expectedname
-        ,workdir
-        ,expectedmb
-        ,expectedmbbvariannce=25):
+def report(downloadedzip
+          ,expectedname
+          ,workdir
+          ,expectedmb
+          ,expectedmbbvariannce=25):
 
     qareport = ""
 
@@ -125,12 +126,24 @@ def qalogging(logfile
 
     return qalogger
 
-if __name__ == '__main__':
+def main():
 
-    pitemid  = sys.argv[1] # 1abcdefghijklmnopqrstuvwxyz0
-    pgdbname = sys.argv[2] # cscl.gdb
-    ptempdir = sys.argv[3] # D:\temp
-    pzipmb   = sys.argv[4] # 500 
+    parser = argparse.ArgumentParser(
+        description="QA a file geodatabase in ArcGIS Online"
+    )
+
+    parser.add_argument("pitemid"
+                       ,help="Item id in ArcGIS Online")
+    parser.add_argument("pgdbname"
+                       ,help="File geodatabase name")
+    parser.add_argument("ptempdir"
+                       ,help="A local temp directory")
+    parser.add_argument("pzipmb"
+                       ,help="Expected geodatabase MB zipped"
+                       ,type=float)
+    args = parser.parse_args()
+    print('zip mb')
+    print('--> {0} <-- '.format(args.pzipmb))
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
     
@@ -138,7 +151,7 @@ if __name__ == '__main__':
     # qa-replace-cscl_pub-gdb-20241121-114410.log
     targetlog = os.path.join(os.environ['TARGETLOGDIR'] 
                             ,'{0}-replace-{1}-{2}.log'.format('qa'
-                                                             ,pgdbname.replace('.', '-')
+                                                             ,args.pgdbname.replace('.', '-')
                                                              ,timestr))
     
     qalogger = qalogging(targetlog)
@@ -147,15 +160,15 @@ if __name__ == '__main__':
                               ,os.environ['NYCMAPCREDS'])
         
     pubgdb = publisher.pubitem(org
-                              ,pitemid)
+                              ,args.pitemid)
     
     # D:\temp\cscl.gdb.zip
-    pubgdb.download(ptempdir)
+    pubgdb.download(args.ptempdir)
     
-    retqareport = main(pubgdb.zipped
-                      ,pgdbname
-                      ,ptempdir
-                      ,pzipmb)
+    retqareport = report(pubgdb.zipped
+                        ,args.pgdbname
+                        ,args.ptempdir
+                        ,args.pzipmb)
     
     pubgdb.clean()
 
@@ -170,3 +183,6 @@ if __name__ == '__main__':
     else:
 
         sys.exit(0)
+
+if __name__ == '__main__':
+    main()

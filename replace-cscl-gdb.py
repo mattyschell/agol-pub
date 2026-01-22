@@ -4,21 +4,30 @@
 # set NYCMAPSUSER=xxxx.xxx.xxx
 # set NYCMAPSCREDS=xxxxxx
 # set TARGETLOGDIR=D:\gis\geodatabase-scripts\logs\replace_cscl_gdb\
-
-import organization
-import publisher
-
 import sys
 import time
 import logging
 import os
+import argparse
 
-if __name__ == '__main__':
+import organization
+import publisher
 
-    srcgdb        = sys.argv[1] # D:\csclwhatever\dbname.gdb
-    targetgdbname = sys.argv[2] # cscl.gdb
-    targetitemid  = sys.argv[3] # aabcdefghijklmnopqrstuvwxyz0
-    tempdir       = sys.argv[4] # D:\temp
+
+def main():
+
+    parser = argparse.ArgumentParser(
+        description="Replace a file geodatabase in ArcGIS Online"
+    )
+    parser.add_argument("srcgdb"
+                       ,help="Local file geodatabase")
+    parser.add_argument("targetgdbname"
+                       ,help="File geodatabase name in ArcGIS Online")
+    parser.add_argument("targetitemid"
+                       ,help="Item id in ArcGIS Online")
+    parser.add_argument("tempdir"
+                       ,help="A local temp directory")
+    args = parser.parse_args()
 
     retval = 1
 
@@ -28,7 +37,7 @@ if __name__ == '__main__':
 
         org = organization.nycmaps(os.environ['NYCMAPSUSER']
                                   ,os.environ['NYCMAPCREDS'])
-        filegdb = publisher.localgdb(srcgdb)
+        filegdb = publisher.localgdb(args.srcgdb)
     
     except Exception as e:
         raise ValueError("Failure {0} in instantiation".format(e)) 
@@ -36,27 +45,31 @@ if __name__ == '__main__':
     # replace-cscl-gdb-20241121-114410.log
     # replace-cscl_pub-gdb-20241121-114410.log
     targetlog = os.path.join(os.environ['TARGETLOGDIR'] 
-                            ,'replace-{0}-{1}.log'.format(targetgdbname.replace('.', '-')
-                                                         ,timestr))
+                            ,'replace-{0}-{1}.log'.format(
+                                args.targetgdbname.replace('.', '-')
+                               ,timestr
+                               )
+                            )
 
     logging.basicConfig(filename=targetlog
                        ,level=logging.INFO)
 
-    logging.info('precleaning any old temp files at {0}'.format(tempdir))
+    logging.info('precleaning any old temp files at {0}'.format(args.tempdir))
     
     # this should succeed 
     filegdb.clean()
     
-    logging.info('renaming {0} to {1} and zipping it'.format(filegdb.gdb
-                                                            ,targetgdbname))
+    logging.info('renaming {0} to {1} and zipping it'.format(
+                                                        filegdb.gdb
+                                                       ,args.targetgdbname))
 
     pubgdb = publisher.pubitem(org
-                              ,targetitemid)
+                              ,args.targetitemid)
     
     try:
         # a known source (get it) of issues
-        filegdb.renamezip(tempdir
-                         ,targetgdbname)
+        filegdb.renamezip(args.tempdir
+                         ,args.targetgdbname)
         retval = 0
     except Exception as e:
         logging.error('Failure calling renamezip for {0}'.format(filegdb.gdb))
@@ -64,18 +77,22 @@ if __name__ == '__main__':
         retval = 1
                         
     if retval == 0:
-        logging.info('replacing nycmaps item with id {0}'.format(targetitemid))
+        logging.info('replacing nycmaps item with id {0}'.format(
+                                                            args.targetitemid))
 
         try:
             replaceval = pubgdb.replace(filegdb.zipped)
             if replaceval:
-                logging.info('Successfully replaced {0}'.format(targetgdbname))
+                logging.info('Successfully replaced {0}'.format(
+                    args.targetgdbname))
                 retval = 0
             else:
-                logging.error('Failure, ArcGIS API returned false replacing {0}'.format(targetgdbname))
+                logging.error(
+                    'Failure, ArcGIS API returned false replacing {0}'.format(
+                        args.targetgdbname))
                 retval = 1
         except:
-            logging.error('Failure replacing {0}'.format(targetgdbname))
+            logging.error('Failure replacing {0}'.format(args.targetgdbname))
             retval = 1
         
         try:
@@ -85,5 +102,7 @@ if __name__ == '__main__':
             # shame 
             pass
     
-
     sys.exit(retval)
+
+if __name__ == '__main__':
+    main()

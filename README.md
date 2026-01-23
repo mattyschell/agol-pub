@@ -19,7 +19,7 @@ Copy geodatabase-scripts\sample-replace-cscl-gdb.bat out to a scripts directory,
 C:\gis\geodatabase-scripts>sample-replace-cscl-gdb.bat
 ``` 
 
-### Replace python script
+#### Replace python script
 
 ```
 usage: replace-cscl-gdb.py [-h] srcgdb targetgdbname targetitemid tempdir
@@ -36,7 +36,7 @@ options:
   -h, --help     show this help message and exit
 ```
 
-### QA python script
+#### QA python script
 
 ```
 usage: replace-cscl-qa.py [-h] pitemid pgdbname ptempdir pzipmb

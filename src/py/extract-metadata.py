@@ -89,7 +89,6 @@ if __name__ == '__main__':
 
         metadata = {}
         # Get the metadata object
-        #print("here goes for {0}".format(existingobject))
         metadata_obj = arcpy.metadata.Metadata(existingobject)
 
         metadata['object'] = existingobject

@@ -8,73 +8,53 @@ import argparse
 print('importing arcpy')
 import arcpy
 print('finished importing arcpy')
-
 import organization
 import publisher
 
 
-def iszip(pzipfile):
+def iszip(testgdb):
 
-    if pzipfile.endswith('.zip'):
+    if testgdb.zipped.endswith('.zip'):
         return True
     else:
         return False
     
-def isreasonablesize(pzipfile
+def isreasonablesize(testgdb
                     ,pexpectedmb
                     ,pvariance):
     
-    sizemb = os.path.getsize(pzipfile) / (1024 * 1024)
+    sizemb = os.path.getsize(testgdb.zipped) / (1024 * 1024)
 
     if (abs(pexpectedmb - sizemb) / pexpectedmb * 100) > int(pvariance):
         return False
     else:
         return True
     
-def isgdbinzip(pzipfile
-              ,pname
-              ,pworkdir):
-    
-    # check gdbname after unzip
-    testgdb = publisher.localgdb(os.path.join(pworkdir
-                                             ,pname))
-    
-    if os.path.exists(testgdb.gdb):
-       testgdb.clean()    
+def isgdbinzip(testgdb):
 
-    with zipfile.ZipFile(pzipfile, 'r') as zip_ref: 
-        zip_ref.extractall(pworkdir)
-    
     if not os.path.exists(testgdb.gdb):
         return False
     else:
-        testgdb.clean()
         return True
     
-def isvalidgdb(pzipfile
+def isvalidgdb(testgdb
               ,pname
               ,pworkdir):
-    
-    # check the uzipped gdb a workspace        
-    testgdb = publisher.localgdb(os.path.join(pworkdir
-                                             ,pname))
-    
-    if os.path.exists(testgdb.gdb):
-       testgdb.clean() 
 
-    with zipfile.ZipFile(pzipfile, 'r') as zip_ref: 
-        zip_ref.extractall(pworkdir)
+    # this creates a gdb lock
+    desc = arcpy.Describe(testgdb.gdb) 
 
-    desc = arcpy.Describe(testgdb.gdb)
-    testgdb.clean() 
-
-    if  desc.dataType == 'Workspace' \
-    and desc.workspaceType == 'LocalDatabase':
-        return True
-    else:
+    if not (desc.dataType == 'Workspace' 
+            and desc.workspaceType == 'LocalDatabase'):
         return False
 
-def report(downloadedzip
+    # this checks .unzipped
+    if testgdb.has_locks():
+        return False
+        
+    return True
+
+def report(testgdb
           ,expectedname
           ,workdir
           ,expectedmb
@@ -84,37 +64,36 @@ def report(downloadedzip
 
     # check that we downloaded a .zip
     # for this one we kick back early
-    if not iszip(downloadedzip):
+    if not iszip(testgdb):
         qareport += '{0} download {1} doesnt appear to be '.format(os.linesep
-                                                                  ,downloadedzip)
+                                                                  ,testgdb.zipped)
         qareport += 'a zip file{2}'.format(os.linesep)
         return qareport
 
-    if not isreasonablesize(downloadedzip
+    if not isreasonablesize(testgdb
                            ,expectedmb
                            ,expectedmbbvariannce):
-
         qareport += '{0} downloaded zip file size is '.format(os.linesep)
-        qareport += 'suspiciously different from expected {0} MB {1}'.format(expectedmb
-                                                                            ,os.linesep)
+        qareport += 'suspiciously different from expected {0} MB {1}'.format(
+                        expectedmb
+                       ,os.linesep)
                      
     # check gdbname after unzip
-    if not isgdbinzip(downloadedzip
-                     ,expectedname
-                     ,workdir):
+    if not isgdbinzip(testgdb):
         
-        qareport += '{0} unzipping downloaded {1}'.format(os.linesep,downloadedzip)
+        qareport += '{0} unzipping downloaded {1}'.format(os.linesep
+                                                         ,testgdb.zipped)
         qareport += 'does not produce {0}{1}'.format(expectedname, os.linesep)
                                                                              
-    if not isvalidgdb(downloadedzip
+    if not isvalidgdb(testgdb
                      ,expectedname
                      ,workdir):
         
-        qareport += '{0} unzipping downloaded {1}'.format(os.linesep,downloadedzip)
+        qareport += '{0} unzipping downloaded {1}'.format(os.linesep
+                                                         ,testgdb.zipped)
         qareport += 'does not produce a valid gdb {0}'.format(os.linesep)
         
     return qareport 
-
 
 def qalogging(logfile
              ,level=logging.INFO):
@@ -142,17 +121,17 @@ def main():
                        ,help="Expected geodatabase MB zipped"
                        ,type=float)
     args = parser.parse_args()
-    print('zip mb')
-    print('--> {0} <-- '.format(args.pzipmb))
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
     
     # qa-replace-cscl-gdb-20241121-114410.log
     # qa-replace-cscl_pub-gdb-20241121-114410.log
     targetlog = os.path.join(os.environ['TARGETLOGDIR'] 
-                            ,'{0}-replace-{1}-{2}.log'.format('qa'
-                                                             ,args.pgdbname.replace('.', '-')
-                                                             ,timestr))
+                            ,'{0}-replace-{1}-{2}.log'.format(
+                               'qa'
+                               ,args.pgdbname.replace('.', '-')
+                               ,timestr)
+                            )
     
     qalogger = qalogging(targetlog)
 
@@ -160,28 +139,34 @@ def main():
                               ,os.environ['NYCMAPCREDS'])
         
     pubgdb = publisher.pubitem(org
-                              ,args.pitemid)
-    
+                              ,args.pitemid)    
     # D:\temp\cscl.gdb.zip
     pubgdb.download(args.ptempdir)
+
+    # this will set both 
+    # testgdb.gdb      = D:\temp\xyz.gdb
+    # testgdb.unzipped = D:\temp\xyz.gdb
+    testgdb = publisher.localgdb(os.path.join(args.ptempdir
+                                             ,args.pgdbname))
+    testgdb.zipped = pubgdb.zipped
+    testgdb.unzip(args.ptempdir)
     
-    retqareport = report(pubgdb.zipped
+    retqareport = report(testgdb
                         ,args.pgdbname
                         ,args.ptempdir
                         ,args.pzipmb)
     
+    arcpy.ClearWorkspaceCache_management()
     pubgdb.clean()
+    testgdb.clean()
 
     if len(retqareport) > 4:
-
         # len 4 allows for a pair of sloppy CRLFs
         # QA does not notify. It QAs 
         qalogger.error('ERROR: Please review {0}'.format(os.linesep))
         qalogger.error(retqareport)
         sys.exit(1)
-
     else:
-
         sys.exit(0)
 
 if __name__ == '__main__':

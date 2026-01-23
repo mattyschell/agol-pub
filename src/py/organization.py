@@ -1,5 +1,5 @@
 try:
-    print('slowly importing {0}'.format('arcgis'))
+    print('importing {0}'.format('arcgis'))
     from arcgis.gis import GIS
     print('completed importing {0}'.format('arcgis'))
 except ImportError as e: 

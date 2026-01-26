@@ -104,9 +104,9 @@ class localgdb(object):
         # C:\dir1\mydata.gdb to
         # C:\dir2\mydata.gdb
 
-        # this is our most likely spot to fail
-        # if the source is not present or is locked
-        # the CSCL production environment is mysterious
+        # This is our most likely spot to fail if 
+        # the source is not present or is locked down
+        # The CSCL production environment is mysterious
         try:
             shutil.copytree(self.gdb
                            ,self.tempcopy
@@ -124,10 +124,15 @@ class localgdb(object):
             print(f"An unexpected error occurred: {e}")
             raise Exception(f"An unexpected error occurred: {e}")
 
-        # C:\dir2\mydata.gdb to
-        # C:\dir2\pubdata.gdb
-        os.rename(self.tempcopy
-                 ,self.renamed)
+        if not self.has_locks():
+            # C:\dir2\mydata.gdb to
+            # C:\dir2\pubdata.gdb
+            os.rename(self.tempcopy
+                     ,self.renamed)
+        else:
+            print('Exiting renamezip without zipping')
+            print('Lock files exist in {0}'.format(self.tempcopy))
+            raise Exception('Lock files exist in {0}'.format(self.tempcopy))
         
         # C:\temp\dir2\pubdata.gdb
         # C:\temp\dir2\pubdata.gdb.zip
@@ -171,6 +176,8 @@ class localgdb(object):
              and any(Path(self.unzipped).glob("*.lock"))
            ):
            return True
+
+        return False
 
     def clean(self):
 

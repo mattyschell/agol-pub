@@ -36,6 +36,14 @@ def isgdbinzip(testgdb):
         return False
     else:
         return True
+
+def haslocks(testgdb):
+
+    # this checks the testgdb.unzipped
+    if testgdb.has_locks():
+        return True
+        
+    return False
     
 def isvalidgdb(testgdb
               ,pname
@@ -47,12 +55,12 @@ def isvalidgdb(testgdb
     if not (desc.dataType == 'Workspace' 
             and desc.workspaceType == 'LocalDatabase'):
         return False
+    else:
+        return True
 
-    # this checks .unzipped
-    if testgdb.has_locks():
-        return False
-        
-    return True
+    # Try to clear locks. This is a temp file so it doesnt matter
+    # Except possibly preventing cleanup
+    arcpy.ClearWorkspaceCache_management()    
 
 def report(testgdb
           ,expectedname
@@ -65,33 +73,40 @@ def report(testgdb
     # check that we downloaded a .zip
     # for this one we kick back early
     if not iszip(testgdb):
-        qareport += '{0} download {1} doesnt appear to be '.format(os.linesep
+        qareport += '{0} download {1} doesnt appear to be'.format(os.linesep
                                                                   ,testgdb.zipped)
-        qareport += 'a zip file{2}'.format(os.linesep)
+        qareport += ' a zip file{2}'.format(os.linesep)
+        # exit early if not a zip file
         return qareport
 
     if not isreasonablesize(testgdb
                            ,expectedmb
                            ,expectedmbbvariannce):
-        qareport += '{0} downloaded zip file size is '.format(os.linesep)
-        qareport += 'suspiciously different from expected {0} MB {1}'.format(
+        qareport += '{0} downloaded zip file size is'.format(os.linesep)
+        qareport +=  ' suspiciously different from expected {0} MB {1}'.format(
                         expectedmb
                        ,os.linesep)
                      
-    # check gdbname after unzip
     if not isgdbinzip(testgdb):
         
         qareport += '{0} unzipping downloaded {1}'.format(os.linesep
                                                          ,testgdb.zipped)
-        qareport += 'does not produce {0}{1}'.format(expectedname, os.linesep)
+        qareport += ' does not produce {0}{1}'.format(expectedname, os.linesep)
                                                                              
+    if haslocks(testgdb):
+        
+        # call before isvalidgdb since arcpy may create locks
+        qareport += '{0} downloaded {1}'.format(os.linesep
+                                               ,testgdb.unzipped)
+        qareport += ' contains locks {0}'.format(os.linesep)
+
     if not isvalidgdb(testgdb
                      ,expectedname
                      ,workdir):
         
-        qareport += '{0} unzipping downloaded {1}'.format(os.linesep
-                                                         ,testgdb.zipped)
-        qareport += 'does not produce a valid gdb {0}'.format(os.linesep)
+        qareport += '{0} downloaded {1} is not a'.format(os.linesep
+                                                        ,testgdb.unzipped)
+        qareport += ' valid gdb according to arcpy {0}'.format(os.linesep)
         
     return qareport 
 
@@ -157,8 +172,8 @@ def main():
                         ,args.pzipmb)
     
     arcpy.ClearWorkspaceCache_management()
-    pubgdb.clean()
-    testgdb.clean()
+    #pubgdb.clean()
+    #testgdb.clean()
 
     if len(retqareport) > 4:
         # len 4 allows for a pair of sloppy CRLFs

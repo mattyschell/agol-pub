@@ -228,7 +228,7 @@ class PublishTestCase(unittest.TestCase):
                                         ,'renamesamplewithlocks.gdb')
 
         self.assertTrue(os.path.isfile(self.localgdbwithlocks.zipped))
-        self.assertFalse(self.localgdbwithlocks.has_locks())
+        self.assertIs(self.localgdbwithlocks.has_locks(), False)
 
         self.localgdbwithlocks.clean()
         self.assertFalse(os.path.isfile(self.localgdbwithlocks.zipped))

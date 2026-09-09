@@ -12,6 +12,7 @@ rem set NYCMAPSCREDS=xxxxxxx
 set NOTIFY=xxx@xxx.xxx.xxx
 set NOTIFYFROM=xxx@xxx.xxx.xxx
 set SMTPFROM=xxxx.xxxx
+set ENV=stg
 set PROXY=http://xxxx.xxxx:xxxx
 set BASEPATH=X:\gis
 set PYTHON1=C:\Progra~1\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe
@@ -49,7 +50,7 @@ if errorlevel 1 (
   %PROPY% %AGOLPUB%\src\py\state_manager.py set-failed %STATEFILE%
   echo. >> %BATLOG% && echo Overwrite failed on %date% at %time%. Not swapping view >> %BATLOG%
   echo 
-  %PROPY% %AGOLPUB%\notify.py "Failed to overwrite %TARGET_COLOR% HFL %TARGETITEMID%" %NOTIFY% "replace-hfl-%TARGETITEMID%"
+  %PROPY% %AGOLPUB%\notify.py "(%ENV%) Failed to overwrite %TARGET_COLOR% HFL %TARGETITEMID%" %NOTIFY% "replace-hfl-%TARGETITEMID%"
   set PYTHONPATH=%PYTHONPATH0%
   exit /b 1
 )
@@ -62,7 +63,7 @@ if errorlevel 1 (
   %PROPY% %AGOLPUB%\src\py\state_manager.py set-failed %STATEFILE%
   echo. >> %BATLOG% && echo Swap failed on %date% at %time%. Investigate and decide rollback. >> %BATLOG%
   echo 
-  %PROPY% %AGOLPUB%\notify.py "Failed to swap view %VIEWITEMID% to %TARGET_COLOR%" %NOTIFY% "replace-hfl-%VIEWITEMID%"
+  %PROPY% %AGOLPUB%\notify.py "(%ENV%) Failed to swap view %VIEWITEMID% to %TARGET_COLOR%" %NOTIFY% "replace-hfl-%VIEWITEMID%"
   set PYTHONPATH=%PYTHONPATH0%
   exit /b 1
 )
